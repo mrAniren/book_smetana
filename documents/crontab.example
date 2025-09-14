@@ -1,0 +1,20 @@
+# Пример cron задач для системы Book Smeta
+# Добавьте эти строки в ваш crontab (crontab -e)
+
+# Создание слотов каждое воскресенье в 00:00
+0 0 * * 0 /usr/bin/php /Applications/XAMPP/xamppfiles/htdocs/Book_smeta/scripts/create_weekly_slots.php >> /var/log/book_smeta_slots.log 2>&1
+
+# Очистка истекших бронирований каждый час
+0 * * * * /usr/bin/php /Applications/XAMPP/xamppfiles/htdocs/Book_smeta/scripts/cleanup_expired_bookings.php >> /var/log/book_smeta_cleanup.log 2>&1
+
+# Синхронизация с GetCourse каждый день в 02:00
+0 2 * * * /usr/bin/php /Applications/XAMPP/xamppfiles/htdocs/Book_smeta/scripts/sync_getcourse_users.php >> /var/log/book_smeta_sync.log 2>&1
+
+# Резервное копирование базы данных каждый день в 03:00
+0 3 * * * /usr/bin/mysqldump -u root book_smeta > /backups/book_smeta_$(date +\%Y\%m\%d).sql
+
+# Очистка старых резервных копий (старше 30 дней) каждое воскресенье в 04:00
+0 4 * * 0 find /backups -name "book_smeta_*.sql" -mtime +30 -delete
+
+# Мониторинг доступности системы каждые 5 минут
+*/5 * * * * curl -f http://localhost/Book_smeta/api/health.php > /dev/null 2>&1 || echo "System down at $(date)" >> /var/log/book_smeta_monitor.log

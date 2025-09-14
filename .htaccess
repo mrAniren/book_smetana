@@ -1,0 +1,27 @@
+RewriteEngine On
+RewriteBase /Book_smeta/
+
+# Перенаправляем API запросы
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/$1 [L,QSA]
+
+# Перенаправляем админ панель
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^admin/(.*)$ admin/$1 [L,QSA]
+
+# Обрабатываем админ панель без слеша
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^admin$ admin/index.php [L,QSA]
+
+# Главная страница
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^$ public/index.php [L]
+
+# Публичные страницы
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^/]+)/?$ public/$1.php [L,QSA]

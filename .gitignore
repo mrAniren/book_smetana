@@ -1,0 +1,59 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Cache
+cache/
+tmp/
+temp/
+
+# Database
+*.sql
+*.db
+*.sqlite
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Composer
+vendor/
+composer.lock
+
+# Test files
+test*.php
+debug*.php
+check*.php
+send*.php
+setup*.php
+
+# Backup files
+*.bak
+*.backup
+
+# Runtime files
+*.pid
+*.sock
+
+# Uploads (if any)
+uploads/
+files/
+
+# Node modules (if any)
+node_modules/
+
+# Build files
+build/
+dist/

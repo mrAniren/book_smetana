@@ -1,0 +1,282 @@
+/* Админ панель стили */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+}
+
+.sidebar .nav-link .feather {
+    margin-right: 4px;
+    color: #999;
+}
+
+.sidebar .nav-link.active .feather {
+    color: inherit;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+/* Карточки статистики */
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.text-xs {
+    font-size: .7rem;
+}
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+/* Графики */
+.chart-area {
+    position: relative;
+    height: 10rem;
+    width: 100%;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Адаптивность */
+@media (max-width: 767.98px) {
+    .sidebar {
+        top: 5rem;
+    }
+}
+
+/* Темная тема для админки */
+.bg-dark {
+    background-color: #343a40 !important;
+}
+
+.sidebar .nav-link {
+    color: #adb5bd;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Стили для таблиц */
+.table-admin {
+    font-size: 0.875rem;
+}
+
+.table-admin th {
+    border-top: none;
+    font-weight: 600;
+    color: #5a5c69;
+}
+
+/* Стили для форм */
+.form-control-admin {
+    border-radius: 0.35rem;
+    border: 1px solid #d1d3e2;
+}
+
+.form-control-admin:focus {
+    border-color: #bac8f3;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Стили для кнопок */
+.btn-admin {
+    border-radius: 0.35rem;
+    font-weight: 600;
+}
+
+/* Стили для модальных окон */
+.modal-admin .modal-header {
+    border-bottom: 1px solid #e3e6f0;
+    background-color: #f8f9fc;
+}
+
+.modal-admin .modal-footer {
+    border-top: 1px solid #e3e6f0;
+    background-color: #f8f9fc;
+}
+
+/* Стили для уведомлений */
+.alert-admin {
+    border: none;
+    border-radius: 0.35rem;
+}
+
+/* Стили для карточек */
+.card-admin {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-admin .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+/* Стили для навигации */
+.navbar-admin {
+    background-color: #fff;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Стили для боковой панели */
+.sidebar-brand {
+    height: 4.375rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    z-index: 1;
+}
+
+.sidebar-brand-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.sidebar-brand-text {
+    display: inline;
+}
+
+/* Стили для активного элемента навигации */
+.sidebar .nav-item .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.35rem;
+}
+
+/* Стили для разделителей */
+.sidebar-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 1rem 0;
+}
+
+/* Стили для текста */
+.text-primary {
+    color: #4e73df !important;
+}
+
+.text-success {
+    color: #1cc88a !important;
+}
+
+.text-info {
+    color: #36b9cc !important;
+}
+
+.text-warning {
+    color: #f6c23e !important;
+}
+
+.text-danger {
+    color: #e74a3b !important;
+}
+
+/* Стили для фона */
+.bg-primary {
+    background-color: #4e73df !important;
+}
+
+.bg-success {
+    background-color: #1cc88a !important;
+}
+
+.bg-info {
+    background-color: #36b9cc !important;
+}
+
+.bg-warning {
+    background-color: #f6c23e !important;
+}
+
+.bg-danger {
+    background-color: #e74a3b !important;
+}
+
+/* Стили для границ */
+.border-primary {
+    border-color: #4e73df !important;
+}
+
+.border-success {
+    border-color: #1cc88a !important;
+}
+
+.border-info {
+    border-color: #36b9cc !important;
+}
+
+.border-warning {
+    border-color: #f6c23e !important;
+}
+
+.border-danger {
+    border-color: #e74a3b !important;
+}

@@ -1,0 +1,17 @@
+{
+    "name": "book-smeta/email-service",
+    "description": "Email service for Book Smeta using Unisender Go SMTP API",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "BookSmeta\\": "includes/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
