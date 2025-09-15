@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 /**
  * Скрипт установки системы Book Smeta
@@ -251,6 +252,13 @@ ini_set('display_errors', 1);
                                 }
                                 echo '</div>';
                                 
+                                // Сохраняем данные БД в сессии
+                                session_start();
+                                $_SESSION['db_host'] = $dbHost;
+                                $_SESSION['db_name'] = $dbName;
+                                $_SESSION['db_user'] = $dbUser;
+                                $_SESSION['db_password'] = $dbPass;
+                                
                                 // Успех
                                 echo '<div class="alert alert-success">';
                                 echo '<h5>🎉 БАЗА ДАННЫХ НАСТРОЕНА УСПЕШНО!</h5>';
@@ -312,10 +320,30 @@ ini_set('display_errors', 1);
                                 
                                 // Обновляем пароль администратора
                                 if (!empty($adminPassword)) {
-                                    $db = new PDO("mysql:host={$_POST['db_host']};dbname={$_POST['db_name']}", $_POST['db_user'], $_POST['db_password']);
-                                    $hashedPassword = password_hash($adminPassword, PASSWORD_DEFAULT);
-                                    $stmt = $db->prepare("UPDATE users SET password_hash = ? WHERE email = ?");
-                                    $stmt->execute([$hashedPassword, $adminEmail]);
+                                    try {
+                                        // Используем данные из сессии
+                                        session_start();
+                                        $dbHost = $_SESSION['db_host'] ?? 'localhost';
+                                        $dbName = $_SESSION['db_name'] ?? 'book_smeta';
+                                        $dbUser = $_SESSION['db_user'] ?? 'root';
+                                        $dbPass = $_SESSION['db_password'] ?? '';
+                                        
+                                        $db = new PDO("mysql:host={$dbHost};dbname={$dbName}", $dbUser, $dbPass);
+                                        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                                        
+                                        // Используем md5 для совместимости с PHP < 5.5
+                                        $hashedPassword = md5($adminPassword);
+                                        
+                                        // Обновляем пароль в правильном поле (password, а не password_hash)
+                                        $stmt = $db->prepare("UPDATE users SET password = ? WHERE email = ?");
+                                        $stmt->execute([$hashedPassword, $adminEmail]);
+                                        
+                                        echo '<div class="alert alert-success">Пароль администратора обновлен!</div>';
+                                        
+                                    } catch (PDOException $e) {
+                                        echo '<div class="alert alert-warning">Не удалось обновить пароль администратора: ' . $e->getMessage() . '</div>';
+                                        echo '<div class="alert alert-info">Вы сможете изменить пароль позже в админ панели</div>';
+                                    }
                                 }
                                 
                                 echo '<div class="alert alert-success">Настройки приложения сохранены!</div>';
