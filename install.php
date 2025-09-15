@@ -95,82 +95,9 @@ ini_set('display_errors', 1);
                                     $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
                                     $pdo->exec("USE `{$dbName}`");
                                     
-                                    // Создаем таблицы напрямую (если schema.sql отсутствует)
-                                    if (file_exists('database/schema.sql')) {
-                                        $schema = file_get_contents('database/schema.sql');
-                                        $pdo->exec($schema);
-                                        echo '<div class="alert alert-success">Схема БД импортирована из файла</div>';
-                                    } else {
-                                        // Создаем таблицы напрямую
-                                        $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-                                            id INT PRIMARY KEY AUTO_INCREMENT,
-                                            email VARCHAR(255) UNIQUE NOT NULL,
-                                            password VARCHAR(255) NOT NULL,
-                                            full_name VARCHAR(255) DEFAULT NULL,
-                                            phone VARCHAR(20),
-                                            role ENUM('user', 'admin', 'super_admin') DEFAULT 'user',
-                                            booking_limit INT DEFAULT 3,
-                                            booking_count INT DEFAULT 0,
-                                            getcourse_user_id VARCHAR(50) DEFAULT NULL,
-                                            is_active BOOLEAN DEFAULT TRUE,
-                                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                            INDEX idx_email (email),
-                                            INDEX idx_getcourse_id (getcourse_user_id),
-                                            INDEX idx_role (role),
-                                            INDEX idx_is_active (is_active)
-                                        )");
-                                        
-                                        $pdo->exec("CREATE TABLE IF NOT EXISTS server_slots (
-                                            id INT PRIMARY KEY AUTO_INCREMENT,
-                                            slot_date DATE NOT NULL,
-                                            start_time TIME NOT NULL,
-                                            end_time TIME NOT NULL,
-                                            max_users INT DEFAULT 1,
-                                            server_login VARCHAR(100) NOT NULL,
-                                            server_password VARCHAR(100) NOT NULL,
-                                            server_ip VARCHAR(45) DEFAULT NULL,
-                                            server_port INT DEFAULT 3389,
-                                            instructions TEXT DEFAULT NULL,
-                                            is_active BOOLEAN DEFAULT TRUE,
-                                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                            INDEX idx_slot_date (slot_date),
-                                            INDEX idx_start_time (start_time),
-                                            INDEX idx_is_active (is_active),
-                                            INDEX idx_slot_datetime (slot_date, start_time)
-                                        )");
-                                        
-                                        $pdo->exec("CREATE TABLE IF NOT EXISTS bookings (
-                                            id INT PRIMARY KEY AUTO_INCREMENT,
-                                            user_id INT NOT NULL,
-                                            slot_id INT NOT NULL,
-                                            booking_status ENUM('active', 'completed', 'cancelled', 'expired') DEFAULT 'active',
-                                            booking_notes TEXT DEFAULT NULL,
-                                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                            expires_at TIMESTAMP NOT NULL,
-                                            INDEX idx_user_id (user_id),
-                                            INDEX idx_slot_id (slot_id),
-                                            INDEX idx_booking_status (booking_status),
-                                            INDEX idx_expires_at (expires_at),
-                                            INDEX idx_user_slot (user_id, slot_id),
-                                            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                                            FOREIGN KEY (slot_id) REFERENCES server_slots(id) ON DELETE CASCADE
-                                        )");
-                                        
-                                        $pdo->exec("CREATE TABLE IF NOT EXISTS system_settings (
-                                            id INT PRIMARY KEY AUTO_INCREMENT,
-                                            setting_key VARCHAR(100) NOT NULL,
-                                            setting_value TEXT DEFAULT NULL,
-                                            description VARCHAR(255) DEFAULT NULL,
-                                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                            UNIQUE KEY setting_key (setting_key)
-                                        )");
-                                        
-                                        echo '<div class="alert alert-success">Таблицы БД созданы напрямую</div>';
-                                    }
+                                    // Импортируем схему
+                                    $schema = file_get_contents('database/schema.sql');
+                                    $pdo->exec($schema);
                                     
                                     // Сохраняем настройки
                                     $envContent = file_get_contents('documents/env.example');
