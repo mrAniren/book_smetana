@@ -94,7 +94,7 @@ if ($_POST) {
                     $hashedPassword = md5($newPassword);
                     
                     $db->update('users', 
-                        ['password' => $hashedPassword], 
+                        ['password_hash' => $hashedPassword], 
                         'id = ?', 
                         [$userId]
                     );
