@@ -129,26 +129,36 @@ ini_set('display_errors', 1);
                                 }
                                 echo '</div>';
                                 
-                                // Шаг 2: Создание/проверка БД
+                                // Шаг 2: Проверка БД
                                 echo '<div class="alert alert-info">';
-                                echo '<h6>Шаг 2: Создание базы данных</h6>';
-                                try {
-                                    $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-                                    echo '✅ База данных создана/проверена<br>';
+                                echo '<h6>Шаг 2: Проверка базы данных</h6>';
+                                
+                                // Проверяем существует ли БД
+                                $stmt = $pdo->query("SHOW DATABASES LIKE '{$dbName}'");
+                                if ($stmt->rowCount() > 0) {
+                                    echo '✅ База данных существует<br>';
                                     
-                                    $pdo->exec("USE `{$dbName}`");
-                                    echo '✅ Переключение на БД успешно<br>';
-                                    
-                                    // Проверяем таблицы
-                                    $stmt = $pdo->query("SHOW TABLES");
-                                    $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-                                    echo 'Таблиц в БД: ' . count($tables) . '<br>';
-                                    if (count($tables) > 0) {
-                                        echo 'Существующие таблицы: ' . implode(', ', $tables) . '<br>';
+                                    try {
+                                        $pdo->exec("USE `{$dbName}`");
+                                        echo '✅ Переключение на БД успешно<br>';
+                                        
+                                        // Проверяем таблицы
+                                        $stmt = $pdo->query("SHOW TABLES");
+                                        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                                        echo 'Таблиц в БД: ' . count($tables) . '<br>';
+                                        if (count($tables) > 0) {
+                                            echo 'Существующие таблицы: ' . implode(', ', $tables) . '<br>';
+                                        }
+                                        
+                                    } catch (PDOException $e) {
+                                        echo '❌ Ошибка переключения на БД: ' . $e->getMessage() . '<br>';
+                                        echo '</div>';
+                                        exit;
                                     }
-                                    
-                                } catch (PDOException $e) {
-                                    echo '❌ Ошибка создания БД: ' . $e->getMessage() . '<br>';
+                                } else {
+                                    echo '❌ База данных не существует<br>';
+                                    echo 'Пользователь не имеет прав на создание БД<br>';
+                                    echo 'Создайте БД в панели Beget<br>';
                                     echo '</div>';
                                     exit;
                                 }
