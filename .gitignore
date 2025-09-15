@@ -40,6 +40,7 @@ send*.php
 setup*.php
 # But allow debug installer
 !debug_installer_exact.php
+!debug_mysql_users.php
 
 # Backup files
 *.bak
