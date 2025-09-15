@@ -43,6 +43,7 @@ setup*.php
 !debug_mysql_users.php
 !debug_form_data.php
 !test_form.php
+!check_users_table.php
 
 # Backup files
 *.bak
