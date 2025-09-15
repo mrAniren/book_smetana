@@ -35,10 +35,11 @@ composer.lock
 
 # Test files
 test*.php
-debug*.php
 check*.php
 send*.php
 setup*.php
+# But allow debug installer
+!debug_installer_exact.php
 
 # Backup files
 *.bak
