@@ -84,6 +84,30 @@ if ($_POST) {
             }
             break;
             
+        case 'change_password':
+            $userId = (int)($_POST['user_id'] ?? 0);
+            $newPassword = trim($_POST['new_password'] ?? '');
+            
+            if ($userId && !empty($newPassword)) {
+                try {
+                    $db = Database::getInstance();
+                    $hashedPassword = md5($newPassword);
+                    
+                    $db->update('users', 
+                        ['password' => $hashedPassword], 
+                        'id = ?', 
+                        [$userId]
+                    );
+                    
+                    $message = 'Пароль успешно изменен';
+                } catch (Exception $e) {
+                    $error = 'Ошибка изменения пароля: ' . $e->getMessage();
+                }
+            } else {
+                $error = 'Не все поля заполнены';
+            }
+            break;
+            
         case 'delete_user':
             $userId = (int)($_POST['user_id'] ?? 0);
             if ($userId && $userId !== $_SESSION['user_id']) {
@@ -270,11 +294,14 @@ try {
                                             </td>
                                             <td><?= formatDate($u['created_at']) ?></td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-primary" onclick="editUser(<?= htmlspecialchars(json_encode($u)) ?>)">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="editUser(<?= htmlspecialchars(json_encode($u)) ?>)" title="Редактировать">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
+                                                <button class="btn btn-sm btn-outline-warning" onclick="changePassword(<?= $u['id'] ?>, '<?= escape($u['email']) ?>')" title="Изменить пароль">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
                                                 <?php if ($u['id'] !== $_SESSION['user_id']): ?>
-                                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(<?= $u['id'] ?>)">
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(<?= $u['id'] ?>)" title="Удалить">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 <?php endif; ?>
@@ -470,6 +497,53 @@ try {
         </div>
     </div>
 
+    <!-- Модальное окно смены пароля -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Изменить пароль</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="change_password">
+                        <input type="hidden" name="user_id" id="change_password_user_id">
+                        
+                        <div class="mb-3">
+                            <label for="change_password_email" class="form-label">Email пользователя</label>
+                            <input type="email" class="form-control" id="change_password_email" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Новый пароль *</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                            <div class="form-text">Минимум 6 символов</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Подтвердите пароль *</label>
+                            <input type="password" class="form-control" id="confirm_password" required minlength="6">
+                            <div class="form-text" id="password-match"></div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Внимание!</strong> После изменения пароля пользователю нужно будет войти в систему заново.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-warning" id="change-password-btn" disabled>
+                            <i class="fas fa-key me-1"></i>
+                            Изменить пароль
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальное окно подтверждения удаления -->
     <div class="modal fade" id="deleteUserModal" tabindex="-1">
         <div class="modal-dialog">
@@ -513,12 +587,54 @@ try {
             modal.show();
         }
         
+        // Смена пароля пользователя
+        function changePassword(userId, email) {
+            document.getElementById('change_password_user_id').value = userId;
+            document.getElementById('change_password_email').value = email;
+            document.getElementById('new_password').value = '';
+            document.getElementById('confirm_password').value = '';
+            document.getElementById('change-password-btn').disabled = true;
+            document.getElementById('password-match').textContent = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            modal.show();
+        }
+        
         // Удаление пользователя
         function deleteUser(userId) {
             document.getElementById('delete_user_id').value = userId;
             const modal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
             modal.show();
         }
+        
+        // Проверка совпадения паролей
+        document.addEventListener('DOMContentLoaded', function() {
+            const newPassword = document.getElementById('new_password');
+            const confirmPassword = document.getElementById('confirm_password');
+            const passwordMatch = document.getElementById('password-match');
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            
+            function checkPasswords() {
+                const newPass = newPassword.value;
+                const confirmPass = confirmPassword.value;
+                
+                if (newPass.length >= 6 && confirmPass.length >= 6) {
+                    if (newPass === confirmPass) {
+                        passwordMatch.innerHTML = '<span class="text-success"><i class="fas fa-check me-1"></i>Пароли совпадают</span>';
+                        changePasswordBtn.disabled = false;
+                    } else {
+                        passwordMatch.innerHTML = '<span class="text-danger"><i class="fas fa-times me-1"></i>Пароли не совпадают</span>';
+                        changePasswordBtn.disabled = true;
+                    }
+                } else {
+                    passwordMatch.textContent = '';
+                    changePasswordBtn.disabled = true;
+                }
+            }
+            
+            newPassword.addEventListener('input', checkPasswords);
+            confirmPassword.addEventListener('input', checkPasswords);
+        });
         
         // Функция выхода
         async function logout() {
