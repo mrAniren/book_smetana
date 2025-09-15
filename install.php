@@ -100,7 +100,7 @@ ini_set('display_errors', 1);
                                     $pdo->exec($schema);
                                     
                                     // Сохраняем настройки
-                                    $envContent = file_get_contents('env.example');
+                                    $envContent = file_get_contents('documents/env.example');
                                     $envContent = str_replace('DB_HOST=localhost', "DB_HOST={$dbHost}", $envContent);
                                     $envContent = str_replace('DB_NAME=book_smeta', "DB_NAME={$dbName}", $envContent);
                                     $envContent = str_replace('DB_USER=root', "DB_USER={$dbUser}", $envContent);
