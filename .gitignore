@@ -44,6 +44,7 @@ setup*.php
 !debug_form_data.php
 !test_form.php
 !check_users_table.php
+!test_login.php
 
 # Backup files
 *.bak

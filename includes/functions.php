@@ -28,6 +28,11 @@ function hashPassword($password) {
  * Проверка пароля
  */
 function verifyPassword($password, $hash) {
+    // Проверяем если хеш MD5 (32 символа)
+    if (strlen($hash) === 32 && ctype_xdigit($hash)) {
+        return md5($password) === $hash;
+    }
+    // Иначе используем стандартную проверку password_verify
     return password_verify($password, $hash);
 }
 
