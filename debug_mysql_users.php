@@ -4,15 +4,27 @@ ini_set('display_errors', 1);
 
 echo "<h2>🔍 ДИАГНОСТИКА ПОЛЬЗОВАТЕЛЕЙ MYSQL</h2>";
 
-// Данные подключения
-$dbHost = 'localhost';
-$dbUser = 'martin9a_book';
-$dbPass = 'ваш_пароль_здесь'; // ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ПАРОЛЬ
-
-echo "<h3>Тестируем подключение к MySQL:</h3>";
-echo "Хост: $dbHost<br>";
-echo "Пользователь: $dbUser<br>";
-echo "Пароль: " . (strlen($dbPass) > 0 ? "УКАЗАН (" . strlen($dbPass) . " символов)" : "НЕ УКАЗАН") . "<br><br>";
+// Проверяем, переданы ли данные формы
+if ($_POST['test_connection']) {
+    $dbHost = $_POST['db_host'] ?? 'localhost';
+    $dbUser = $_POST['db_user'] ?? 'martin9a_book';
+    $dbPass = $_POST['db_pass'] ?? '';
+    
+    echo "<h3>Тестируем подключение к MySQL:</h3>";
+    echo "Хост: $dbHost<br>";
+    echo "Пользователь: $dbUser<br>";
+    echo "Пароль: " . (strlen($dbPass) > 0 ? "УКАЗАН (" . strlen($dbPass) . " символов)" : "НЕ УКАЗАН") . "<br><br>";
+} else {
+    // Показываем форму
+    echo "<form method='post'>";
+    echo "<h3>Введите данные подключения к MySQL:</h3>";
+    echo "Хост: <input type='text' name='db_host' value='localhost'><br><br>";
+    echo "Пользователь: <input type='text' name='db_user' value='martin9a_book'><br><br>";
+    echo "Пароль: <input type='password' name='db_pass'><br><br>";
+    echo "<input type='submit' name='test_connection' value='Тестировать подключение'>";
+    echo "</form>";
+    exit;
+}
 
 // Тест 1: Подключение к MySQL без указания БД
 echo "<h3>Тест 1: Подключение к MySQL (без БД)</h3>";
