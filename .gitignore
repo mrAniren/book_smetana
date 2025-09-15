@@ -13,9 +13,10 @@ tmp/
 temp/
 
 # Database
-*.sql
 *.db
 *.sqlite
+# But allow schema files
+!database/*.sql
 
 # IDE files
 .vscode/
