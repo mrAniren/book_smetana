@@ -23,12 +23,16 @@ class Auth {
             return false;
         }
         
-        // Обновляем время последнего входа
-        $this->db->update('users', 
-            ['last_login' => date('Y-m-d H:i:s')],
-            'id = ?',
-            [$user['id']]
-        );
+        // Обновляем время последнего входа (если поле существует)
+        try {
+            $this->db->update('users', 
+                ['last_login' => date('Y-m-d H:i:s')],
+                'id = ?',
+                [$user['id']]
+            );
+        } catch (Exception $e) {
+            // Игнорируем ошибку если поле last_login не существует
+        }
         
         // Устанавливаем сессию
         $this->setSession($user);
