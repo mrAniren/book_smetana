@@ -172,9 +172,25 @@ ini_set('display_errors', 1);
                                     $schema = file_get_contents('database/schema.sql');
                                     echo 'Размер схемы: ' . strlen($schema) . ' символов<br>';
                                     
+                                    // Убираем проблемные команды из схемы
+                                    $schema = preg_replace('/CREATE DATABASE.*?;/i', '', $schema);
+                                    $schema = preg_replace('/USE\s+\w+.*?;/i', '', $schema);
+                                    $schema = preg_replace('/--.*$/m', '', $schema); // Убираем комментарии
+                                    $schema = preg_replace('/^\s*$/m', '', $schema); // Убираем пустые строки
+                                    echo 'Схема очищена от проблемных команд<br>';
+                                    
                                     try {
-                                        $pdo->exec($schema);
-                                        echo '✅ Схема выполнена успешно<br>';
+                                        // Выполняем команды по одной
+                                        $commands = explode(';', $schema);
+                                        $executed = 0;
+                                        foreach ($commands as $command) {
+                                            $command = trim($command);
+                                            if (!empty($command)) {
+                                                $pdo->exec($command);
+                                                $executed++;
+                                            }
+                                        }
+                                        echo "✅ Выполнено команд: $executed<br>";
                                         
                                         // Проверяем таблицы после импорта
                                         $stmt = $pdo->query("SHOW TABLES");
@@ -187,6 +203,7 @@ ini_set('display_errors', 1);
                                     } catch (PDOException $e) {
                                         echo '❌ Ошибка выполнения схемы: ' . $e->getMessage() . '<br>';
                                         echo 'Код ошибки: ' . $e->getCode() . '<br>';
+                                        echo 'Команда: ' . htmlspecialchars(substr($command, 0, 100)) . '<br>';
                                         echo '</div>';
                                         exit;
                                     }
