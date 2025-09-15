@@ -42,6 +42,7 @@ setup*.php
 !debug_installer_exact.php
 !debug_mysql_users.php
 !debug_form_data.php
+!test_form.php
 
 # Backup files
 *.bak
