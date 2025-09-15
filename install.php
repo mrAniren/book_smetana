@@ -82,38 +82,157 @@ ini_set('display_errors', 1);
                             echo '<h4>Шаг 2: Настройка базы данных</h4>';
                             
                             if ($_POST) {
+                                echo '<div class="alert alert-info"><h5>🔍 ДИАГНОСТИКА УСТАНОВКИ</h5></div>';
+                                
                                 $dbHost = $_POST['db_host'] ?? 'localhost';
                                 $dbName = $_POST['db_name'] ?? 'book_smeta';
                                 $dbUser = $_POST['db_user'] ?? 'root';
                                 $dbPass = $_POST['db_password'] ?? '';
                                 
+                                echo '<div class="alert alert-secondary">';
+                                echo '<h6>Полученные данные:</h6>';
+                                echo 'Хост: ' . htmlspecialchars($dbHost) . '<br>';
+                                echo 'БД: ' . htmlspecialchars($dbName) . '<br>';
+                                echo 'Пользователь: ' . htmlspecialchars($dbUser) . '<br>';
+                                echo 'Пароль: ' . (strlen($dbPass) > 0 ? "УКАЗАН (" . strlen($dbPass) . " символов)" : "НЕ УКАЗАН") . '<br>';
+                                echo '</div>';
+                                
+                                // Шаг 1: Тест подключения к MySQL
+                                echo '<div class="alert alert-info">';
+                                echo '<h6>Шаг 1: Подключение к MySQL</h6>';
                                 try {
                                     $pdo = new PDO("mysql:host={$dbHost}", $dbUser, $dbPass);
                                     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                                    echo '✅ Подключение к MySQL успешно<br>';
                                     
-                                    // Создаем базу данных
-                                    $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-                                    $pdo->exec("USE `{$dbName}`");
+                                    // Показываем доступные БД
+                                    $stmt = $pdo->query("SHOW DATABASES");
+                                    $databases = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                                    echo 'Доступные БД: ' . implode(', ', $databases) . '<br>';
                                     
-                                    // Импортируем схему
-                                    $schema = file_get_contents('database/schema.sql');
-                                    $pdo->exec($schema);
-                                    
-                                    // Сохраняем настройки
-                                    $envContent = file_get_contents('documents/env.example');
-                                    $envContent = str_replace('DB_HOST=localhost', "DB_HOST={$dbHost}", $envContent);
-                                    $envContent = str_replace('DB_NAME=book_smeta', "DB_NAME={$dbName}", $envContent);
-                                    $envContent = str_replace('DB_USER=root', "DB_USER={$dbUser}", $envContent);
-                                    $envContent = str_replace('DB_PASSWORD=', "DB_PASSWORD={$dbPass}", $envContent);
-                                    
-                                    file_put_contents('.env', $envContent);
-                                    
-                                    echo '<div class="alert alert-success">База данных настроена успешно!</div>';
-                                    echo '<a href="?step=3" class="btn btn-primary">Продолжить</a>';
+                                    // Проверяем привилегии
+                                    $stmt = $pdo->query("SHOW GRANTS");
+                                    $grants = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                                    echo 'Привилегии: ' . implode(', ', $grants) . '<br>';
                                     
                                 } catch (PDOException $e) {
-                                    echo '<div class="alert alert-danger">Ошибка подключения к базе данных: ' . $e->getMessage() . '</div>';
+                                    echo '❌ Ошибка подключения к MySQL: ' . $e->getMessage() . '<br>';
+                                    echo 'Код ошибки: ' . $e->getCode() . '<br>';
+                                    echo '</div>';
+                                    echo '<div class="alert alert-danger">';
+                                    echo '<h6>Возможные решения:</h6>';
+                                    echo '1. Проверьте данные в панели Beget<br>';
+                                    echo '2. Убедитесь что пользователь имеет права на БД<br>';
+                                    echo '3. Проверьте что БД существует<br>';
+                                    echo '</div>';
+                                    exit;
                                 }
+                                echo '</div>';
+                                
+                                // Шаг 2: Создание/проверка БД
+                                echo '<div class="alert alert-info">';
+                                echo '<h6>Шаг 2: Создание базы данных</h6>';
+                                try {
+                                    $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                                    echo '✅ База данных создана/проверена<br>';
+                                    
+                                    $pdo->exec("USE `{$dbName}`");
+                                    echo '✅ Переключение на БД успешно<br>';
+                                    
+                                    // Проверяем таблицы
+                                    $stmt = $pdo->query("SHOW TABLES");
+                                    $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                                    echo 'Таблиц в БД: ' . count($tables) . '<br>';
+                                    if (count($tables) > 0) {
+                                        echo 'Существующие таблицы: ' . implode(', ', $tables) . '<br>';
+                                    }
+                                    
+                                } catch (PDOException $e) {
+                                    echo '❌ Ошибка создания БД: ' . $e->getMessage() . '<br>';
+                                    echo '</div>';
+                                    exit;
+                                }
+                                echo '</div>';
+                                
+                                // Шаг 3: Импорт схемы
+                                echo '<div class="alert alert-info">';
+                                echo '<h6>Шаг 3: Импорт схемы БД</h6>';
+                                if (file_exists('database/schema.sql')) {
+                                    echo '✅ Файл schema.sql найден<br>';
+                                    $schema = file_get_contents('database/schema.sql');
+                                    echo 'Размер схемы: ' . strlen($schema) . ' символов<br>';
+                                    
+                                    try {
+                                        $pdo->exec($schema);
+                                        echo '✅ Схема выполнена успешно<br>';
+                                        
+                                        // Проверяем таблицы после импорта
+                                        $stmt = $pdo->query("SHOW TABLES");
+                                        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                                        echo 'Таблиц после импорта: ' . count($tables) . '<br>';
+                                        if (count($tables) > 0) {
+                                            echo 'Созданные таблицы: ' . implode(', ', $tables) . '<br>';
+                                        }
+                                        
+                                    } catch (PDOException $e) {
+                                        echo '❌ Ошибка выполнения схемы: ' . $e->getMessage() . '<br>';
+                                        echo 'Код ошибки: ' . $e->getCode() . '<br>';
+                                        echo '</div>';
+                                        exit;
+                                    }
+                                } else {
+                                    echo '❌ Файл database/schema.sql не найден<br>';
+                                    echo '</div>';
+                                    exit;
+                                }
+                                echo '</div>';
+                                
+                                // Шаг 4: Создание .env файла
+                                echo '<div class="alert alert-info">';
+                                echo '<h6>Шаг 4: Создание конфигурации</h6>';
+                                if (file_exists('documents/env.example')) {
+                                    echo '✅ Файл env.example найден<br>';
+                                    
+                                    try {
+                                        $envContent = file_get_contents('documents/env.example');
+                                        $envContent = str_replace('DB_HOST=localhost', "DB_HOST={$dbHost}", $envContent);
+                                        $envContent = str_replace('DB_NAME=book_smeta', "DB_NAME={$dbName}", $envContent);
+                                        $envContent = str_replace('DB_USER=root', "DB_USER={$dbUser}", $envContent);
+                                        $envContent = str_replace('DB_PASSWORD=', "DB_PASSWORD={$dbPass}", $envContent);
+                                        
+                                        file_put_contents('.env', $envContent);
+                                        echo '✅ Файл .env создан<br>';
+                                        
+                                        // Проверяем содержимое .env
+                                        $envCheck = file_get_contents('.env');
+                                        if (strpos($envCheck, "DB_HOST={$dbHost}") !== false) {
+                                            echo '✅ DB_HOST правильно настроен<br>';
+                                        }
+                                        if (strpos($envCheck, "DB_NAME={$dbName}") !== false) {
+                                            echo '✅ DB_NAME правильно настроен<br>';
+                                        }
+                                        
+                                    } catch (Exception $e) {
+                                        echo '❌ Ошибка создания .env: ' . $e->getMessage() . '<br>';
+                                        echo '</div>';
+                                        exit;
+                                    }
+                                } else {
+                                    echo '❌ Файл documents/env.example не найден<br>';
+                                    echo '</div>';
+                                    exit;
+                                }
+                                echo '</div>';
+                                
+                                // Успех
+                                echo '<div class="alert alert-success">';
+                                echo '<h5>🎉 БАЗА ДАННЫХ НАСТРОЕНА УСПЕШНО!</h5>';
+                                echo '<p>Все шаги выполнены без ошибок. Система готова к дальнейшей настройке.</p>';
+                                echo '</div>';
+                                
+                                echo '<div class="d-grid gap-2">';
+                                echo '<a href="?step=3" class="btn btn-success btn-lg">Продолжить настройку</a>';
+                                echo '</div>';
                             } else {
                                 ?>
                                 <form method="POST">
